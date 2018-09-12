@@ -10,6 +10,7 @@ import 'dart:async';
 
 import 'package:fluro/fluro.dart';
 import 'package:fluro/src/common.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 enum TransitionType {
@@ -20,6 +21,7 @@ enum TransitionType {
   inFromBottom,
   fadeIn,
   custom, // if using custom then you must also provide a transition
+  forceCupertino
 }
 
 class Router {
@@ -117,8 +119,21 @@ class Router {
 
     RouteCreator creator =
         (RouteSettings routeSettings, Map<String, List<String>> parameters) {
+
       bool isNativeTransition = (transitionType == TransitionType.native ||
           transitionType == TransitionType.nativeModal);
+
+      bool isForceCupertinoTransition = (transitionType == TransitionType.forceCupertino);
+
+      if(isForceCupertinoTransition) {
+        return new CupertinoPageRoute<dynamic>(
+            settings: routeSettings,
+            fullscreenDialog: transitionType == TransitionType.nativeModal,
+            builder: (BuildContext context) {
+              return handler.handlerFunc(context, parameters);
+            });
+      }
+
       if (isNativeTransition) {
         return new MaterialPageRoute<dynamic>(
             settings: routeSettings,
